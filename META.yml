@@ -1,0 +1,29 @@
+---
+abstract: 'A DNS ad filter'
+author:
+  - 'David Watson (terminalfool@yahoo.com)'
+build_requires:
+  ExtUtils::MakeMaker: 6.36
+configure_requires:
+  ExtUtils::MakeMaker: 6.36
+distribution_type: module
+dynamic_config: 1
+generated_by: 'Module::Install version 1.06'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+module_name: Net::DNS::Dynamic::Adfilter
+name: Net-DNS-Dynamic-Adfilter
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  IO::Socket::INET: 1.31
+  LWP::Simple: 5.835
+  Net::DNS::Dynamic::Proxyserver: 1.1
+  Test::Simple: 0.44
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.05

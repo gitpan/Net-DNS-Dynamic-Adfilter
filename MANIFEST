@@ -1,0 +1,8 @@
+MANIFEST
+README
+Changes
+Makefile.PL
+lib/Net/DNS/Dynamic/adfilter.pm
+t/1.t
+t/2.t
+scripts/adfilter.pl
