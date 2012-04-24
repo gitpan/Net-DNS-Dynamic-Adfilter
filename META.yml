@@ -26,4 +26,5 @@ requires:
   Test::Simple: 0.44
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.05
+  repository: http://github.com/terminalfool/Net-DNS-Dynamic-Adfilter
+version: 0.06
