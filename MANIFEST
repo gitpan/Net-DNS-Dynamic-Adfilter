@@ -2,7 +2,9 @@ MANIFEST
 README
 Changes
 Makefile.PL
-lib/Net/DNS/Dynamic/adfilter.pm
+lib/Net/DNS/Dynamic/Adfilter.pm
 t/1.t
 t/2.t
 scripts/adfilter.pl
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)
