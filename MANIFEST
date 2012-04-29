@@ -1,10 +1,10 @@
-MANIFEST
-README
 Changes
+LICENSE
+MANIFEST
+META.yml
 Makefile.PL
+README
 lib/Net/DNS/Dynamic/Adfilter.pm
+scripts/adfilter.pl
 t/1.t
 t/2.t
-scripts/adfilter.pl
-META.yml                                 Module YAML meta-data (added by MakeMaker)
-META.json                                Module JSON meta-data (added by MakeMaker)

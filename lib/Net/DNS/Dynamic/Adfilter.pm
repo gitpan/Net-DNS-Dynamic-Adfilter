@@ -1,10 +1,11 @@
 package Net::DNS::Dynamic::Adfilter;
 
-our $VERSION = '0.062';
+our $VERSION = '0.063';
 
-use Moose;
-use LWP::Simple;
-use IO::Socket::INET;
+use Moose 2.0403;
+use LWP::Simple 6.00;
+use Net::Address::IP::Local 0.1.2;
+use Net::DNS::Dynamic::Proxyserver 1.2;
 
 extends 'Net::DNS::Dynamic::Proxyserver';
 
@@ -16,11 +17,7 @@ override 'run' => sub {
 
 	my ( $self ) = shift;
 
-	my $sock = IO::Socket::INET->new(
-		PeerAddr=> "example.com",
-		PeerPort=> 80,
-		Proto   => "tcp");
-	my $localip = $sock->sockhost;
+	my $localip = Net::Address::IP::Local->public_ipv4;
 
 #--switch dns settings on mac osx, wireless interface
 #	system("networksetup -setdnsservers \"Wi-Fi\" $localip");
@@ -164,6 +161,10 @@ __PACKAGE__->meta->make_immutable;
 
 Net::DNS::Dynamic::Adfilter - A DNS ad filter
 
+=head1 VERSION
+
+version 0.063
+
 =head1 DESCRIPTION
 
 This is a DNS server intended for use as an ad filter for a local area network. 
@@ -298,7 +299,7 @@ Specify the port of the remote nameservers. Defaults to the standard port 53.
 =head1 CAVEATS
 
 It will be necessary to manually adjust the host's network dns settings to take advantage 
-of the filtering. On Mac hosts, uncommenting the I<networksetup> system calls of adfilter.pm will 
+of the filtering. On Mac hosts, uncommenting the I<networksetup> system calls of Adfilter.pm will 
 automate this.
 
 =head1 AUTHOR
