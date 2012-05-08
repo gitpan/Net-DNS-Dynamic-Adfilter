@@ -29,7 +29,7 @@ my %WriteMakefileArgs = (
     "Net::Address::IP::Local" => "v0.1.2",
     "Net::DNS::Dynamic::Proxyserver" => "1.2"
   },
-  "VERSION" => "0.063",
+  "VERSION" => "0.064",
   "test" => {
     "TESTS" => "t/*.t"
   }

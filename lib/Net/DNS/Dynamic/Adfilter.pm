@@ -1,6 +1,6 @@
 package Net::DNS::Dynamic::Adfilter;
 
-our $VERSION = '0.063';
+our $VERSION = '0.064';
 
 use Moose 2.0403;
 use LWP::Simple 6.00;
@@ -20,7 +20,7 @@ override 'run' => sub {
 	my $localip = Net::Address::IP::Local->public_ipv4;
 
 #--switch dns settings on mac osx, wireless interface
-#	system("networksetup -setdnsservers \"Wi-Fi\" $localip");
+#	system("networksetup -setdnsservers \"Wi-Fi\" 127.0.0.1");
 #	system("networksetup -setsearchdomains \"Wi-Fi\" localhost");
 #--
 
@@ -37,16 +37,15 @@ override 'run' => sub {
 #};
 #--
 
-around 'reply_handler' => sub {
+around 'reply_handler' => sub {                         # query ad listings
+
         my $orig = shift;
         my $self = shift;
         my ($qname, $qclass, $qtype, $peerhost, $query, $conn) = @_;
 
         my ($rcode, @ans, @auth, @add);
 
- 	# see if we can answer the question from hosts listings
- 	#
- 	if ($self->adfilter && ($qtype eq 'A' || $qtype eq 'PTR')) {
+ 	if ($self->adfilter && ($qtype eq 'AAAA' || $qtype eq 'A' || $qtype eq 'PTR')) {
     
  		if (my $ip = $self->query_adfilter( $qname, $qtype )) {
 
@@ -86,16 +85,20 @@ after 'read_config' => sub {
 sub query_adfilter {
 	my ( $self, $qname, $qtype ) = @_;
 
-	$qname =~ s/^.*\.(\w+\.\w+)$/$1/ if $qtype eq 'A';
-	
-	return $self->search_ip_in_adfilter( $qname ) if $qtype eq 'A';
+	return $self->search_ip_in_adfilter( $qname ) if  ($qtype eq 'A' || $qtype eq 'AAAA');
 	return $self->search_hostname_by_ip( $qname ) if $qtype eq 'PTR';
 }
 
 sub search_ip_in_adfilter {
         my ( $self, $hostname ) = @_;
+	my $trim = $hostname;
+	my $sld = $hostname;
+	$trim =~ s/^www\.//i;
+	$sld =~ s/^.*\.(\w+\.\w+)$/$1/;
 
-        return '::1' if (exists $self->adfilter->{$hostname});
+	return '::1' if ( exists $self->adfilter->{$hostname} ||
+			  exists $self->adfilter->{$trim} ||
+			  exists $self->adfilter->{$sld} );
         return;
 }
 
@@ -163,7 +166,7 @@ Net::DNS::Dynamic::Adfilter - A DNS ad filter
 
 =head1 VERSION
 
-version 0.063
+version 0.064
 
 =head1 DESCRIPTION
 
@@ -174,8 +177,8 @@ either to a specified list of nameservers or to those listed in /etc/resolv.conf
 The module can also load and resolve host definitions found in /etc/hosts as 
 well as hosts defined in a sql database.
 
-Externally maintained lists of ad hosts may be loaded periodically through a specified 
-url. A local addendum of hosts may also be specified. Ad host listings must conform 
+Externally maintained lists of ad hosts can be loaded periodically through a specified 
+url. A local addendum of hosts can also be specified. Ad host listings must conform 
 to a one host per line format:
 
   # ad nauseam
@@ -267,7 +270,7 @@ first column in the result.
 
 =head2 debug
 
-The debug option logs actions to stdout and may be set from 1-3 with increasing 
+The debug option logs actions to stdout and can be set from 1-3 with increasing 
 output: the module will feedback (1) adfilter.pm logging, (2) nameserver logging, 
 and (3) resolver logging. 
 
@@ -298,9 +301,9 @@ Specify the port of the remote nameservers. Defaults to the standard port 53.
 
 =head1 CAVEATS
 
-It will be necessary to manually adjust the host's network dns settings to take advantage 
-of the filtering. On Mac hosts, uncommenting the I<networksetup> system calls of Adfilter.pm will 
-automate this.
+It will be necessary to manually set the host's network dns settings to 127.0.0.1 in 
+order to take advantage of the filtering. On Mac hosts, uncommenting the I<networksetup> 
+system calls of Adfilter.pm will automate this.
 
 =head1 AUTHOR
 

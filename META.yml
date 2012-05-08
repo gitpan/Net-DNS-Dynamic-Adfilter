@@ -21,6 +21,5 @@ requires:
   Net::Address::IP::Local: v0.1.2
   Net::DNS::Dynamic::Proxyserver: 1.2
 resources:
-  bugtracker: https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter/issues
-  repository: git://github.com/terminalfool/Net-DNS-Dynamic-Adfilter.git
-version: 0.063
+  repository: git://github.com/terminalfool/https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter.git
+version: 0.064

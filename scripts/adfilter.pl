@@ -1,22 +1,22 @@
 #!/usr/bin/env perl
 
-use lib "lib/";
+use lib "../lib/";
 
 use strict;
 use warnings;
 
-use Net::DNS::Dynamic::Adfilter 0.063;
+use Net::DNS::Dynamic::Adfilter 0.064;
 
 use Getopt::Long;
 use Pod::Usage;
 
-our $VERSION = '0.063';
+our $VERSION = '0.064';
 
 my $debug 	      = 0;
 my $verbose	      = 0;
 my $help	      = 0;
-my $host 	      = undef;
-my $port	      = undef;
+my $host 	      = '127.0.0.1';
+my $port	      = '53';
 my $background	      = 0;
 my $ask_etc_hosts     = undef;
 my $uid		      = undef;
@@ -85,7 +85,7 @@ adfilter.pl [options]
    -h   -help              display this help
    -v   -verbose           show server activity
    -d   -debug             enable debug mode
-        -host              host (defaults to all)
+        -host              host (defaults to localhost)
    -p   -port              port (defaults to 53)
    -u   -uid               run with user id
    -g   -gid               run with group id
