@@ -26,10 +26,10 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "LWP::Simple" => "6.00",
     "Moose" => "2.0403",
-    "Net::Address::IP::Local" => "v0.1.2",
+    "Net::Address::IP::Local" => 0,
     "Net::DNS::Dynamic::Proxyserver" => "1.2"
   },
-  "VERSION" => "0.064",
+  "VERSION" => "0.065",
   "test" => {
     "TESTS" => "t/*.t"
   }

@@ -1,17 +1,19 @@
 package Net::DNS::Dynamic::Adfilter;
 
-our $VERSION = '0.064';
+our $VERSION = '0.065';
 
 use Moose 2.0403;
-use LWP::Simple 6.00;
-use Net::Address::IP::Local 0.1.2;
+use Net::Address::IP::Local;
 use Net::DNS::Dynamic::Proxyserver 1.2;
+
+use LWP::Simple 6.00 qw($ua getstore);
+$ua->agent("");
 
 extends 'Net::DNS::Dynamic::Proxyserver';
 
-has adfilter=> ( is => 'rw', isa => 'HashRef', required => 0 );
-has ask_pgl_hosts=> ( is => 'rw', isa => 'HashRef', required => 0 );
-has ask_more_hosts=> ( is => 'rw', isa => 'HashRef', required => 0 );
+has adfilter => ( is => 'rw', isa => 'HashRef', required => 0 );
+has adblock_stack => ( is => 'rw', isa => 'ArrayRef', required => 0 );
+has custom_filter => ( is => 'rw', isa => 'HashRef', required => 0 );
 
 override 'run' => sub {
 
@@ -52,9 +54,7 @@ around 'reply_handler' => sub {                         # query ad listings
                  	$self->log("received query from $peerhost: qtype '$qtype', qname '$qname'");
  			$self->log("[local host listings] resolved $qname to $ip NOERROR");
 
-                        my $refresh = $self->ask_pgl_hosts->{adhosts_refresh} || 7;
-
- 			my ($ttl, $rdata) = ((int(abs($refresh)) * 86400), $ip );
+ 			my ($ttl, $rdata) = ( 300, $ip );
         
  			push @ans, Net::DNS::RR->new("$qname $ttl $qclass $qtype $rdata");
 
@@ -70,12 +70,15 @@ after 'read_config' => sub {
  	my ( $self ) = shift;
         my $cache = ();
 
- 	if ($self->ask_pgl_hosts) {
- 	        $cache = { $self->parse_pgl_hosts() };  # pgl.yoyo.org hosts
-    	        %{ $self->{adfilter} } = %{ $cache };
- 	}
-        if ($self->ask_more_hosts) {
- 	        $cache = { $self->parse_more_hosts() }; # local, custom hosts
+        if ($self->adblock_stack) {
+        	for ( @{ $self->adblock_stack } ) {
+ 	                $cache = { $self->load_adblock_filter($_) };    # adblock plus hosts
+                        %{ $self->{adfilter} } = $self->adfilter ? ( %{ $self->{adfilter} }, %{ $cache } ) 
+                                         : %{ $cache };
+	        }
+	}
+        if ($self->custom_filter) {
+ 	        $cache = { $self->load_custom_filter() };               # local, custom hosts
                 %{ $self->{adfilter} } = $self->adfilter ? ( %{ $self->{adfilter} }, %{ $cache } ) 
                                          : %{ $cache };
  	}
@@ -102,38 +105,54 @@ sub search_ip_in_adfilter {
         return;
 }
 
-sub parse_pgl_hosts {
+sub load_adblock_filter {
 	my ( $self ) = shift;
-
-	return unless $self->ask_pgl_hosts;
 
 	my %cache;
 
-	my $hostsfile = $self->ask_pgl_hosts->{path} or die "ask_pgl_hosts->{path} is undefined";
-	my $refresh = $self->ask_pgl_hosts->{refresh} || 7;
+	my $hostsfile = $_->{path} or die "adblock {path} is undefined";
+	my $refresh = $_->{refresh} || 7;
 	my $age = -M $hostsfile || $refresh;
 
 	if ($age >= $refresh) {
-        	my $url = $self->ask_pgl_hosts->{url} or die "attempting to refresh $hostsfile failed as ask_pgl_hosts->{url} is undefined";
-	        $self->log("refreshing pgl hosts: $hostsfile", 1);
+        	my $url = $_->{url} or die "attempting to refresh $hostsfile failed as {url} is undefined";
+	        $self->log("refreshing hosts: $hostsfile", 1);
 	        getstore($url, $hostsfile);
 	}
+
+	%cache = $self->parse_adblock_hosts($hostsfile);
+		
+	return %cache;
+}
+
+sub load_custom_filter {
+	my ( $self ) = shift;
+
+	return unless my $hostsfile = $self->custom_filter->{path};
+
+	my %cache;
 
 	%cache = $self->parse_single_col_hosts($hostsfile);
 		
 	return %cache;
 }
 
-sub parse_more_hosts {
-	my ( $self ) = shift;
+sub parse_adblock_hosts {
+	my ( $self, $hostsfile ) = @_;
 
-	return unless my $hostsfile = $self->ask_more_hosts->{path};
+	my %hosts;
 
-	my %cache;
+	open(HOSTS, $hostsfile) or die "cant open $hostsfile file: $!";
 
-	%cache = $self->parse_single_col_hosts($hostsfile);
-		
-	return %cache;
+	while (<HOSTS>) {
+	        chomp;
+		next unless s/^\|\|((\w+\.)+\w+)\^(\$third-party)?$/$1/;  #extract adblock host
+		$hosts{$_}++;
+	}
+
+	close(HOSTS);
+
+	return %hosts;
 }
 
 sub parse_single_col_hosts {
@@ -166,27 +185,24 @@ Net::DNS::Dynamic::Adfilter - A DNS ad filter
 
 =head1 VERSION
 
-version 0.064
+version 0.065
 
 =head1 DESCRIPTION
 
 This is a DNS server intended for use as an ad filter for a local area network. 
-Its function is to load lists of ad domains and nullify DNS queries for those 
+Its function is to load lists of ad domains and nullify DNS queries for these 
 domains to the loopback address. Any other DNS queries are proxied upstream, 
 either to a specified list of nameservers or to those listed in /etc/resolv.conf. 
 The module can also load and resolve host definitions found in /etc/hosts as 
 well as hosts defined in a sql database.
 
-Externally maintained lists of ad hosts can be loaded periodically through a specified 
-url. A local addendum of hosts can also be specified. Ad host listings must conform 
-to a one host per line format:
+The module loads externally maintained lists of ad hosts intended for use by 
+Adblock Plus, a popular ad filtering extension for the Firefox browser. Use of 
+the lists focuses only on third-party listings, since these generally define 
+dedicated ad/tracking hosts.
 
-  # ad nauseam
-  googlesyndication.com
-  facebook.com
-  twitter.com
-  ...
-  adinfinitum.com
+A local addendum of hosts can also be specified. In this case, ad host listings 
+must conform to a one host per line format.
 
 Once running, local network dns queries can be addressed to the host's ip. This ip is 
 echoed to stdout.
@@ -202,34 +218,56 @@ upstream to nameservers defined in /etc/resolv.conf.
 
 =head1 ATTRIBUTES
 
-=head2 ask_pgl_hosts
+=head2 adblock_stack
 
     my $adfilter = Net::DNS::Dynamic::Adfilter->new(
 
-        ask_pgl_hosts => {
-            url => 'http://pgl.yoyo.org/adservers/serverlist.php?hostformat=nohtml&showintro=0&&mimetype=plaintext',
+        adblock_stack => [
+            {
+            url => 'http://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext',
             path => '/var/named/adhosts',     #path to ad hosts
-            refresh => 7,                     #ttl in days (default = 7)
-        },
+            refresh => 7,                     #refresh value in days (default = 7)
+            },
+
+            {
+            url => 'https://easylist-downloads.adblockplus.org/easyprivacy.txt',
+            path => '/var/named/easyprivacy.txt',
+            refresh => 5,
+            },
+        ],
     );
 
-The ask_pgl_hosts hashref defines a url that returns a single column list of ad hosts. In the 
-module's current version, this is the only acceptable format. A path string defines where the 
-module will write a local copy of this list. The refresh value determines what age (in days) 
-the local copy may be before it is refreshed. This value also determines the lifespan (ttl) 
-of queries based upon this list.
+The adblock_stack arrayref encloses one or more hashrefs composed of three 
+arguments: a url that returns a list of ad hosts in adblock plus format; 
+a path string that defines where the module will write a local copy of 
+the list; a refresh value that determines what age (in days) the local copy 
+may be before it is refreshed.
 
-=head2 ask_more_hosts
+There are dozens of adblock plus filters scattered throughout the internet. You can 
+load them all if you like, though doing so may defeat your purpose. One or two, such 
+as those listed above, should suffice.
+
+A collection of lists is available at http://adblockplus.org/en/subscriptions
+
+=head2 custom_filter
 
     my $adfilter = Net::DNS::Dynamic::Adfilter->new(
 
-        ask_more_hosts => {
+        custom_filter => {
             path => '/var/named/morehosts',  #path to secondary hosts
         },
     );
 
-The ask_more_hosts hashref contains only a path string that defines where the module will access an 
-addendum of ad hosts to nullify. As above, a single column is the only acceptable format.
+The custom_filter hashref contains only a path string that defines where the module will 
+access an addendum of ad hosts to nullify. As mentioned above, a single column is the only 
+acceptable format:
+
+    # ad nauseam
+    googlesyndication.com
+    facebook.com
+    twitter.com
+    ...
+    adinfinitum.com
 
 =head1 LEGACY ATTRIBUTES
 
@@ -276,7 +314,8 @@ and (3) resolver logging.
 
 =head2 host
 
-The IP address to bind to. If not defined, the server binds to all (*).
+The IP address to bind to. If not defined, the server binds to all (*). This might not 
+be possible on some networks. Use 127.0.0.1.
 
 =head2 port
 
@@ -303,7 +342,7 @@ Specify the port of the remote nameservers. Defaults to the standard port 53.
 
 It will be necessary to manually set the host's network dns settings to 127.0.0.1 in 
 order to take advantage of the filtering. On Mac hosts, uncommenting the I<networksetup> 
-system calls of Adfilter.pm will automate this.
+system calls in the module will automate this.
 
 =head1 AUTHOR
 
