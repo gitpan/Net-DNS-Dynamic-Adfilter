@@ -4,7 +4,7 @@ MANIFEST
 META.json
 Makefile.PL
 README
-lib/Net/DNS/Dynamic/Adfilter.pm
+lib/Net/DNS/Dynamic/adfilter.pm
 scripts/adfilter.pl
 t/1.t
 t/2.t

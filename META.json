@@ -30,6 +30,7 @@
       "test" : {
          "requires" : {
             "Data::Dumper" : "0",
+            "Net::DNS::Dynamic::Adfilter" : "0",
             "Net::DNS::Resolver" : "0",
             "Test" : "0"
          }
@@ -46,6 +47,6 @@
          "web" : "https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter"
       }
    },
-   "version" : "0.065"
+   "version" : "0.066"
 }
 

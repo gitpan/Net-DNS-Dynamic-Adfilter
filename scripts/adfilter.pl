@@ -5,12 +5,12 @@ use lib "../lib/";
 use strict;
 use warnings;
 
-use Net::DNS::Dynamic::Adfilter 0.065;
+use Net::DNS::Dynamic::Adfilter 0.066;
 
 use Getopt::Long;
 use Pod::Usage;
 
-our $VERSION = '0.065';
+our $VERSION = '0.066';
 
 my $debug 	      = 0;
 my $verbose	      = 0;
@@ -46,15 +46,17 @@ $args->{nameservers}	  = [ $nameserver ] if $nameserver;
 $args->{nameservers_port} = $nameserver_port if $nameserver_port;
 $args->{adblock_stack}    = [
 			       { url => 'http://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext',
-			        path => '/var/named/pgl-adblock.txt',
-			        refresh => 7,
+			         path => '/var/named/pgl-adblock.txt',
+			         refresh => 7,
 			       },
-			       { url => "https://easylist-downloads.adblockplus.org/easyprivacy.txt",
+			       { url => "abp:subscribe?location=https%3A%2F%2Feasylist-downloads.adblockplus.org%2Feasyprivacy.txt&title=EasyPrivacy&requiresLocation=https%3A%2F%2Feasylist-downloads.adblockplus.org%2Feasylist.txt&requiresTitle=EasyList",
 			         path => '/var/named/easyprivacy.txt',
 			         refresh => 5,
 			       },
 			    ];
 #$args->{custom_filter}	  = { path => '/var/named/morehosts' };
+
+#$args->{whitelist}	  = { path => '/var/named/whitelist' };
 
 Net::DNS::Dynamic::Adfilter->new( $args )->run();
 
@@ -86,7 +88,7 @@ Though the module permits the use of as many lists as you like, it should be suf
      sudo perl adfilter.pl -bg
      # you must manually kill this process
 
-Edit the adblock_stack and custom_filter args to your liking.
+Edit the adblock_stack, custom_filter and whitelist args to your liking.
 
 =head1 AUTHOR
 
