@@ -13,7 +13,6 @@ my %WriteMakefileArgs = (
   "AUTHOR" => "David Watson <dwatson\@cpan.org>",
   "BUILD_REQUIRES" => {
     "Data::Dumper" => 0,
-    "Net::DNS::Dynamic::Adfilter" => 0,
     "Net::DNS::Resolver" => 0,
     "Test" => 0
   },
@@ -30,7 +29,7 @@ my %WriteMakefileArgs = (
     "Net::Address::IP::Local" => 0,
     "Net::DNS::Dynamic::Proxyserver" => "1.2"
   },
-  "VERSION" => "0.066",
+  "VERSION" => "0.067",
   "test" => {
     "TESTS" => "t/*.t"
   }

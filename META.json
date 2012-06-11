@@ -30,7 +30,6 @@
       "test" : {
          "requires" : {
             "Data::Dumper" : "0",
-            "Net::DNS::Dynamic::Adfilter" : "0",
             "Net::DNS::Resolver" : "0",
             "Test" : "0"
          }
@@ -41,12 +40,13 @@
       "bugtracker" : {
          "web" : "https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter/issues"
       },
+      "homepage" : "http://search.cpan.org/~dwatson/Net-DNS-Dynamic-Adfilter/",
       "repository" : {
          "type" : "git",
          "url" : "git://github.com/terminalfool/Net-DNS-Dynamic-Adfilter.git",
          "web" : "https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter"
       }
    },
-   "version" : "0.066"
+   "version" : "0.067"
 }
 
