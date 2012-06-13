@@ -5,13 +5,13 @@ use lib "../lib/";
 use strict;
 use warnings;
 
-use Net::DNS::Dynamic::Adfilter 0.067;
+use Net::DNS::Dynamic::Adfilter 0.068;
 use Net::Address::IP::Local;
 
 use Getopt::Long;
 use Pod::Usage;
 
-our $VERSION = '0.067';
+our $VERSION = '0.068';
 
 #my $host 	      = undef;                    # defaults to all (*)
 my $host = Net::Address::IP::Local->public_ipv4; #set to local ip
@@ -64,7 +64,7 @@ Net::DNS::Dynamic::Adfilter->new( $args )->run();
 
 =head1 NAME
 
-adfilter.pl - Sample interface script to Net::DNS::Dynamic::Adfilter
+adfilter.pl - Sample script using Net::DNS::Dynamic::Adfilter
 
 =head1 SYNOPSIS
 
@@ -74,14 +74,14 @@ adfilter.pl [options]
    -h   -help                   display this help
    -v   -verbose                show server activity
    -d   -debug                  enable debug mode
-        -host                   host (defaults to localhost)
+        -host                   host (defaults to all *)
    -p   -port                   port (defaults to 53)
    -bg  -background             run the process in the background
    -ns  -nameserver             forward queries to this nameserver (<ip>:<port>)
 
 =head1 DESCRIPTION
 
-This script implements a dynamic DNS proxy server for the purpose of filtering advertisements. 
+This script implements a dynamic DNS proxy server for the purpose of blocking advertisements. 
 
 =head1 CAVEATS
 

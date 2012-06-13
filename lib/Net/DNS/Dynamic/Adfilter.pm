@@ -1,6 +1,6 @@
 package Net::DNS::Dynamic::Adfilter;
 
-our $VERSION = '0.067';
+our $VERSION = '0.068';
 
 use Moose 2.0403;
 use Net::Address::IP::Local;
@@ -188,7 +188,7 @@ Net::DNS::Dynamic::Adfilter - A DNS ad filter
 
 =head1 VERSION
 
-version 0.067
+version 0.068
 
 =head1 DESCRIPTION
 
@@ -200,9 +200,9 @@ The module can also load and resolve host definitions found in /etc/hosts as
 well as hosts defined in a sql database.
 
 The module loads externally maintained lists of ad hosts intended for use by 
-Adblock Plus, a popular ad filtering extension for the Firefox browser. Use of 
-the lists focuses only on third-party listings, since these generally define 
-dedicated ad/tracking hosts.
+Adblock Plus, a popular ad filtering extension for the Firefox browser. Use 
+of the lists focuses only on third-party listings that define dedicated 
+advertising and tracking hosts.
 
 A locally maintained blacklist/whitelist can also be loaded. In this case, host 
 listings must conform to a one host per line format.
@@ -252,7 +252,7 @@ above should suffice.
 
 A collection of lists is available at http://adblockplus.org/en/subscriptions. 
 The module will accept standard or abp:subscribe? urls. You can cut and paste 
-encoded subscription links directly.
+encoded links directly.
 
 =head2 blacklist
 
@@ -306,7 +306,7 @@ listed in /etc/resolv.conf.
 
 =head2 nameservers_port
 
-Specify the port of the remote nameservers. Defaults to the standard port 53.
+The port of the remote nameservers. Defaults 53.
 
 =head2 debug
 

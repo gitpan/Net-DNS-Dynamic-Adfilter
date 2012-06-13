@@ -24,4 +24,4 @@ resources:
   bugtracker: https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter/issues
   homepage: http://search.cpan.org/~dwatson/Net-DNS-Dynamic-Adfilter/
   repository: git://github.com/terminalfool/Net-DNS-Dynamic-Adfilter.git
-version: 0.067
+version: 0.068
