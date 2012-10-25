@@ -16,12 +16,13 @@ meta-spec:
   version: 1.4
 name: Net-DNS-Dynamic-Adfilter
 requires:
-  LWP::Simple: 6.00
-  Moose: 2.0403
-  Net::Address::IP::Local: 0
-  Net::DNS::Dynamic::Proxyserver: 1.2
+  Capture::Tiny: 0
+  LWP::Simple: 0
+  Moose: 0
+  Net::DNS::Dynamic::Proxyserver: 0
+  Sys::HostIP: 0
 resources:
   bugtracker: https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter/issues
   homepage: http://search.cpan.org/~dwatson/Net-DNS-Dynamic-Adfilter/
   repository: git://github.com/terminalfool/Net-DNS-Dynamic-Adfilter.git
-version: 0.068
+version: 0.069

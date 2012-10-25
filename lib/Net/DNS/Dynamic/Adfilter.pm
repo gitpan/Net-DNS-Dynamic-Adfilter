@@ -1,11 +1,12 @@
 package Net::DNS::Dynamic::Adfilter;
+{
+  $Net::DNS::Dynamic::Adfilter::VERSION = '0.069';
+}
 
-our $VERSION = '0.068';
-
-use Moose 2.0403;
-use Net::Address::IP::Local;
-use Net::DNS::Dynamic::Proxyserver 1.2;
-use LWP::Simple 6.00 qw($ua getstore);
+use Moose;
+use Sys::HostIP;
+use Capture::Tiny qw(capture);
+use LWP::Simple qw($ua getstore);
 $ua->agent("");
 
 #use Data::Dumper;
@@ -16,27 +17,29 @@ has adblock_stack => ( is => 'rw', isa => 'ArrayRef', required => 0 );
 has blacklist => ( is => 'rw', isa => 'HashRef', required => 0 );
 has whitelist => ( is => 'rw', isa => 'HashRef', required => 0 );
 has adfilter => ( is => 'rw', isa => 'HashRef', required => 0 );
+has host => ( is => 'rw', isa => 'Str', required => 0, default => sub { Sys::HostIP->ip } );
+has network => ( is => 'rw', isa => 'HashRef', required => 0 );
+has setdns => ( is => 'rw', isa => 'Int', required => 0, default => 0 );
 
 override 'run' => sub {
 	my ( $self ) = shift;
-	my $localip = Net::Address::IP::Local->public_ipv4;
 
-#--switch dns settings on mac osx, wireless interface
-#	system("networksetup -setdnsservers \"Wi-Fi\" $localip");
-#	system("networksetup -setsearchdomains \"Wi-Fi\" localhost");
-#--
+	if ( $self->setdns ) {
+	        my $host = Sys::HostIP->new;
+	        my %devices = reverse %{ $host->interfaces };
+                $self->{network}->{interface} = $devices{ $self->host };
 
-	$self->log("Nameserver accessible locally @ $localip", 1);
+                $self->set_local_dns;
+	}
+
 	$self->nameserver->main_loop;
 };
 
-#--restore dns settings on mac osx, wireless interface
-#before 'signal_handler' => sub {
-#	my ( $self ) = shift;
-#	system('networksetup -setdnsservers "Wi-Fi" empty');
-#	system('networksetup -setsearchdomains "Wi-Fi" empty');
-#};
-#--
+before 'signal_handler' => sub {
+	my ( $self ) = shift;
+
+        $self->restore_local_dns if $self->setdns;
+};
 
 around 'reply_handler' => sub {                         # query ad listings
         my $orig = shift;
@@ -50,7 +53,7 @@ around 'reply_handler' => sub {                         # query ad listings
  		if (my $ip = $self->query_adfilter( $qname, $qtype )) {
 
                  	$self->log("received query from $peerhost: qtype '$qtype', qname '$qname'");
- 			$self->log("[local host listings] resolved $qname to $ip NOERROR");
+ 			$self->log("[local] resolved $qname to $ip NOERROR");
 
  			my ($ttl, $rdata) = ( 300, $ip );
         
@@ -103,7 +106,7 @@ sub search_ip_in_adfilter {
 	my $trim = $hostname;
 	my $sld = $hostname;
 	$trim =~ s/^www\.//i;
-	$sld =~ s/^.*\.(\w+\.\w+)$/$1/;
+	$sld =~ s/^.*\.(.+\..+)$/$1/;
 
 	return '::1' if ( exists $self->adfilter->{$hostname} ||
 			  exists $self->adfilter->{$trim} ||
@@ -141,7 +144,7 @@ sub parse_adblock_hosts {
 
 	while (<HOSTS>) {
 	        chomp;
-		next unless s/^\|\|((\w+\.)+\w+)\^(\$third-party)?$/$1/;  #extract adblock host
+		next unless s/^\|\|(.*)\^(\$third-party)?$/$1/;  #extract adblock host
 		$hosts{$_}++;
 	}
 
@@ -169,6 +172,76 @@ sub parse_single_col_hosts {
 	return %hosts;
 }
 
+sub set_local_dns {
+	my ( $self ) = shift;
+
+	my $stdout;
+	my $stderr;
+	my @result;
+
+        if ($^O	=~ /darwin/i) {                                                          # is osx
+	        eval {
+	                ($self->{network}->{service}, $stderr, @result) = capture { system("networksetup -listallhardwareports | grep -B 1 $self->{network}->{interface} | cut -c 16-32") };
+			if ($stderr || ($result[0] < 0)) {
+			       die $stderr || $result[0];
+			} else {
+			       $self->{network}->{service} =~ s/\n//g;
+			       system("networksetup -setdnsservers $self->{network}->{service} $self->{host}");
+			       system("networksetup -setsearchdomains $self->{network}->{service} empty");
+			}
+		}
+	}
+
+	if (!grep { $^O eq $_ } qw(VMS MSWin32 os2 dos MacOS darwin NetWare beos vos)) { # is unix
+	        eval {
+	                ($stdout, $stderr, @result) = capture { system("cp /etc/resolv.conf /etc/resolv.bk") };
+			if ($stderr || ($result[0] < 0)) {
+			       die $stderr || $result[0];
+			} else {
+			       open(CONF, ">", "/etc/resolv.conf");
+			       print CONF "nameserver $self->{host}\n";
+			       close CONF;
+			}
+                }
+	}
+
+	if ($stderr||$result[0]) {
+	       $self->log("switching of local dns settings failed: $@", 1);
+	       undef $self->setdns;
+	} else {
+	       $self->log("local dns settings ($self->{network}->{interface}) switched", 1);
+	}
+}
+
+sub restore_local_dns {
+	my ( $self ) = shift;
+
+	my $stdout;
+	my $stderr;
+	my @result;
+
+        if ($^O	=~ /darwin/i) {                                                         # is osx
+	        eval {
+		        ($stdout, $stderr, @result) = capture { system("networksetup -setdnsservers $self->{network}->{service} empty") };
+			if ($stderr || ($result[0] < 0)) {
+			       die $stderr || $result[0];
+			} else {
+                               system("networksetup -setsearchdomains $self->{network}->{service} empty");
+			}
+                }
+	}
+
+	if (!grep { $^O eq $_ } qw(VMS MSWin32 os2 dos MacOS darwin NetWare beos vos)) { # is unix
+	        eval {
+                        ($stdout, $stderr, @result) = capture { system("mv /etc/resolv.bk /etc/resolv.conf") };
+			die $stderr || $result[0];
+                }
+        }
+
+	($stderr||$result[0]) ? $self->log("local dns settings failed to restore: $@", 1)
+	        : $self->log("local dns settings restored", 1);
+}
+
 sub dump_adfilter {
 	my $self = shift;
 
@@ -188,7 +261,7 @@ Net::DNS::Dynamic::Adfilter - A DNS ad filter
 
 =head1 VERSION
 
-version 0.068
+version 0.069
 
 =head1 DESCRIPTION
 
@@ -196,19 +269,15 @@ This is a DNS server intended for use as an ad filter for a local area network.
 Its function is to load lists of ad domains and nullify DNS queries for those 
 domains to the loopback address. Any other DNS queries are proxied upstream, 
 either to a specified list of nameservers or to those listed in /etc/resolv.conf. 
-The module can also load and resolve host definitions found in /etc/hosts as 
-well as hosts defined in a sql database.
 
 The module loads externally maintained lists of ad hosts intended for use by 
-Adblock Plus, a popular ad filtering extension for the Firefox browser. Use 
-of the lists focuses only on third-party listings that define dedicated 
-advertising and tracking hosts.
+the Adblock Plus firefox extension. Use of the lists focuses only on third-party 
+listings that define dedicated advertising and tracking hosts.
 
 A locally maintained blacklist/whitelist can also be loaded. In this case, host 
 listings must conform to a one host per line format.
 
-Once running, local network dns queries can be addressed to the host's ip. This 
-ip is echoed to stdout.
+Once running, local network dns queries can be addressed to the host's ip.
 
 =head1 SYNOPSIS
 
@@ -216,7 +285,7 @@ ip is echoed to stdout.
 
     $adfilter->run();
 
-Without any arguments, the module will function simply as a proxy, forwarding all 
+Without any attributes, the module will function simply as a proxy, forwarding all 
 requests upstream to nameservers defined in /etc/resolv.conf.
 
 =head1 ATTRIBUTES
@@ -248,7 +317,7 @@ may be before it is refreshed.
 
 There are dozens of adblock plus filters scattered throughout the internet. 
 You can load as many as you like, though one or two lists such as those listed 
-above should suffice.
+above should do.
 
 A collection of lists is available at http://adblockplus.org/en/subscriptions. 
 The module will accept standard or abp:subscribe? urls. You can cut and paste 
@@ -286,80 +355,38 @@ only acceptable format:
 The whitelist hashref, like the blacklist hashref, contains only a path parameter 
 to a single column list of hosts. These hosts will be removed from the filter.
 
-=head1 LEGACY ATTRIBUTES
+=head2 host, port
 
-From the parent class Net::DNS::Dynamic::Proxyserver.
+    my $adfilter = Net::DNS::Dynamic::Adfilter->new( host => $host, port => $port );
 
-=head2 host
+The IP address to bind to. If not defined, the server attempts binding to the local ip.
+The default port is 53.
 
-The IP address to bind to. If not defined, the server binds to all (*). This might not 
-be possible on some networks. Use the host's local ip address.
+=head2 nameservers, nameservers_port
 
-=head2 port
-
-The tcp & udp port to run the DNS server under. Defaults to 53.
-
-=head2 nameservers
+    my $adfilter = Net::DNS::Dynamic::Adfilter->new( nameservers => [ $ns1, $ns2, ], nameservers_port => $port );
 
 An arrayref of one or more nameservers to forward any DNS queries to. Defaults to nameservers 
-listed in /etc/resolv.conf.
+listed in /etc/resolv.conf. The default port is 53.
 
-=head2 nameservers_port
+=head2 setdns
 
-The port of the remote nameservers. Defaults 53.
+    my $adfilter = Net::DNS::Dynamic::Adfilter->new( setdns  => '1' } ); #defaults to '0'
+
+If set, the module attempts to set local dns settings to the host's ip. This may or may not work
+if there are multiple active interfaces. You may need to manually adjust your local dns settings.
 
 =head2 debug
+
+    my $adfilter = Net::DNS::Dynamic::Adfilter->new( debug => '1' ); #defaults to '0'
 
 The debug option logs actions to stdout and can be set from 1-3 with increasing 
 output: the module will feedback (1) adfilter.pm logging, (2) nameserver logging, 
 and (3) resolver logging. 
 
-=head2 ask_etc_hosts
-
-    my $adfilter = Net::DNS::Dynamic::Adfilter->new(
-
-        ask_etc_hosts => { ttl => 3600 },	 #if set, parse and resolve /etc/hosts; ttl in seconds
-    );
-
-Definition of ask_etc_hosts activates parsing of /etc/hosts and resolution of matching queries 
-with a lifespan of ttl (in seconds).
-
-=head2 ask_sql_hosts
-
-If defined, the module will query an sql database of hosts, provided the database file can be 
-accessed (read/write) with the defined uid/gid.
-
-    my $adfilter = Net::DNS::Dynamic::Adfilter->new( 
-
-        ask_sql => {
-  	    ttl => 60, 
-	    dsn => 'DBI:mysql:database=db_name;host=localhost;port=3306',
-	    user => 'my_user',
-	    pass => 'my_password',
-	    statement => "SELECT ip FROM hosts WHERE hostname='{qname}' AND type='{qtype}'"
-        },
-        uid => 65534, #only if necessary
-        gid => 65534,
-    );
-
-The 'statement' is a SELECT statement, which must return the IP address for the given query name 
-(qname) and query type (qtype, like 'A' or 'MX'). The placeholders {qname} and {qtype} will be 
-replaced by the actual query name and type. Your statement must return the IP address as the 
-first column in the result.
-
-=head2 uid
-
-The optional user id to switch to after the socket has been created.
-
-=head2 gid
-
-The optional group id to switch to after the socket has been created.
-
 =head1 CAVEATS
 
-It will be necessary to manually set dns settings to the host's local ip in order to take 
-advantage of the filtering. On Mac hosts, uncommenting the I<networksetup> system calls 
-in the module will automate this.
+Written and tested under darwin only.
 
 =head1 AUTHOR
 
@@ -367,7 +394,7 @@ David Watson <dwatson@cpan.org>
 
 =head1 SEE ALSO
 
-scripts/adfilter.pl in the distribution
+Installed sample script: /usr/local/bin/adfilter.pl (scripts/adfilter.pl in the distribution)
 
 Net::DNS::Dynamic::Proxyserver
 
