@@ -2,7 +2,7 @@ NAME
     Net::DNS::Dynamic::Adfilter - A DNS ad filter
 
 VERSION
-    version 0.069
+    version 0.070
 
 DESCRIPTION
     This is a DNS server intended for use as an ad filter for a local area
@@ -41,9 +41,8 @@ ATTRIBUTES
                 path => '/var/named/pgl-adblock.txt',     #path to ad hosts
                 refresh => 7,                             #refresh value in days (default = 7)
                 },
-
                 {
-                url => 'abp:subscribe?location=https%3A%2F%2Feasylist-downloads.adblockplus.org%2Feasyprivacy.txt&title=EasyPrivacy&requiresLocation=https%3A%2F%2Feasylist-downloads.adblockplus.org%2Feasylist.txt&requiresTitle=EasyList';
+                url => "abp:subscribe?location=https%3A%2F%2Feasylist-downloads.adblockplus.org%2Feasyprivacy.txt&title=EasyPrivacy&requiresLocation=https%3A%2F%2Feasylist-downloads.adblockplus.org%2Feasylist.txt&requiresTitle=EasyList",
                 path => '/var/named/easyprivacy.txt',
                 refresh => 5,
                 },

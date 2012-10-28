@@ -5,8 +5,7 @@ META.json
 META.yml
 Makefile.PL
 README
-inc/script.pm
-lib/Net/DNS/Dynamic/Adfilter.pm
+lib/Net/DNS/Dynamic/adfilter.pm
 scripts/adfilter.pl
 t/1.t
 t/2.t

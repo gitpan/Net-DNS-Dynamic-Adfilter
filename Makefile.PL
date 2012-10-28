@@ -10,6 +10,7 @@ my %WriteMakefileArgs = (
   'AUTHOR' => 'David Watson <dwatson@cpan.org>',
   'BUILD_REQUIRES' => {
     'Data::Dumper' => '0',
+    'Net::DNS::Dynamic::Adfilter' => '0',
     'Net::DNS::Resolver' => '0',
     'Test' => '0'
   },
@@ -27,10 +28,11 @@ my %WriteMakefileArgs = (
     'Capture::Tiny' => '0',
     'LWP::Simple' => '0',
     'Moose' => '0',
+    'Mozilla::CA' => '0',
     'Net::DNS::Dynamic::Proxyserver' => '0',
     'Sys::HostIP' => '0'
   },
-  'VERSION' => '0.069',
+  'VERSION' => '0.070',
   'test' => {
     'TESTS' => 't/*.t'
   }

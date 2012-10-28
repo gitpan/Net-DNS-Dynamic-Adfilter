@@ -4,6 +4,7 @@ author:
   - 'David Watson <dwatson@cpan.org>'
 build_requires:
   Data::Dumper: 0
+  Net::DNS::Dynamic::Adfilter: 0
   Net::DNS::Resolver: 0
   Test: 0
 configure_requires:
@@ -19,10 +20,11 @@ requires:
   Capture::Tiny: 0
   LWP::Simple: 0
   Moose: 0
+  Mozilla::CA: 0
   Net::DNS::Dynamic::Proxyserver: 0
   Sys::HostIP: 0
 resources:
   bugtracker: https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter/issues
   homepage: http://search.cpan.org/~dwatson/Net-DNS-Dynamic-Adfilter/
   repository: git://github.com/terminalfool/Net-DNS-Dynamic-Adfilter.git
-version: 0.069
+version: 0.070

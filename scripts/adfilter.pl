@@ -50,8 +50,8 @@ $args->{adblock_stack}    = [
 			         refresh => 7,
 			       },
 			       { url => "abp:subscribe?location=https%3A%2F%2Feasylist-downloads.adblockplus.org%2Feasyprivacy.txt&title=EasyPrivacy&requiresLocation=https%3A%2F%2Feasylist-downloads.adblockplus.org%2Feasylist.txt&requiresTitle=EasyList",
-			         path => '/var/named/easyprivacy.txt',
-			         refresh => 5,
+	                         path => '/var/named/easyprivacy.txt',
+	                         refresh => 5,
 			       },
 			    ];
 #$args->{blacklist}	  = { path => '/var/named/blacklist' };
@@ -84,9 +84,11 @@ This script implements a dynamic DNS proxy server for the purpose of blocking ad
 
 =head1 CAVEATS
 
+Installation places this script in /usr/local/bin/
+
 Though the module permits the use of as many lists as you like, it should be sufficient to use one or two lists, accept the defaults and run it in the background:
 
-     sudo perl adfilter.pl -bg
+     sudo perl /usr/local/bin/adfilter.pl -bg -setdns
      # you must manually kill this process
 
 Edit the adblock_stack, blacklist and whitelist args to your liking.
