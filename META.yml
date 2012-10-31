@@ -4,13 +4,12 @@ author:
   - 'David Watson <dwatson@cpan.org>'
 build_requires:
   Data::Dumper: 0
-  Net::DNS::Dynamic::Adfilter: 0
   Net::DNS::Resolver: 0
   Test: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300016, CPAN::Meta::Converter version 2.120921'
+generated_by: 'Dist::Zilla version 4.300028, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -18,13 +17,15 @@ meta-spec:
 name: Net-DNS-Dynamic-Adfilter
 requires:
   Capture::Tiny: 0
+  Getopt::Long: 0
   LWP::Simple: 0
   Moose: 0
   Mozilla::CA: 0
   Net::DNS::Dynamic::Proxyserver: 0
+  Pod::Usage: 0
   Sys::HostIP: 0
+  strict: 0
+  warnings: 0
 resources:
-  bugtracker: https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter/issues
-  homepage: http://search.cpan.org/~dwatson/Net-DNS-Dynamic-Adfilter/
   repository: git://github.com/terminalfool/Net-DNS-Dynamic-Adfilter.git
-version: 0.070
+version: 0.071
