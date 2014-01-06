@@ -31,13 +31,14 @@ my %WriteMakefileArgs = (
     "LWP::Simple" => 0,
     "Moose" => 0,
     "Mozilla::CA" => 0,
+    "Net::DNS::Dynamic::Adfilter" => 0,
     "Net::DNS::Dynamic::Proxyserver" => 0,
     "Pod::Usage" => 0,
     "Sys::HostIP" => 0,
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.071",
+  "VERSION" => "0.072",
   "test" => {
     "TESTS" => "t/*.t"
   }

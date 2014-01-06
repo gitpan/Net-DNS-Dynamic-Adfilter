@@ -18,6 +18,7 @@ my $background	      = 0;
 my $nameserver	      = undef;
 my $nameserver_port   = undef;
 my $setdns            = undef;
+my $loopback          = undef;
 
 GetOptions(
     'debug|d'	               => \$debug,
@@ -28,6 +29,7 @@ GetOptions(
     'background|bg'            => \$background,
     'nameserver|ns=s'          => \$nameserver,
     'setdns'    	       => \$setdns,
+    'loopback=s'               => \$loopback,
 );
 
 pod2usage(1) if $help;
@@ -44,6 +46,7 @@ $args->{port}		  = $port if $port;
 $args->{nameservers}	  = [ $nameserver ] if $nameserver;
 $args->{nameservers_port} = $nameserver_port if $nameserver_port;
 $args->{setdns}	          = 1 if $setdns;
+$args->{loopback}         = $loopback if $loopback;
 $args->{adblock_stack}    = [
 			       { url => 'http://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&showintro=0&startdate[day]=&startdate[month]=&startdate[year]=&mimetype=plaintext',
 			         path => '/var/named/pgl-adblock.txt',
@@ -54,9 +57,9 @@ $args->{adblock_stack}    = [
 	                         refresh => 5,
 			       },
 			    ];
-#$args->{blacklist}	  = { path => '/var/named/blacklist' };
+#$args->{blacklist}	  = '/var/named/blacklist';
 
-#$args->{whitelist}	  = { path => '/var/named/whitelist' };
+#$args->{whitelist}	  = '/var/named/whitelist';
 
 Net::DNS::Dynamic::Adfilter->new( $args )->run();
 
@@ -66,7 +69,7 @@ adfilter.pl - Sample script using Net::DNS::Dynamic::Adfilter
 
 =head1 VERSION
 
-version 0.071
+version 0.072
 
 =head1 SYNOPSIS
 
@@ -81,6 +84,7 @@ adfilter.pl [options]
    -bg  -background             run the process in the background
    -ns  -nameserver             forward queries to this nameserver (<ip>:<port>)
         -setdns                 adjust dns settings on local host
+        -loopback               set specific loopback address (defaults to 127.0.0.1)
 
 =head1 DESCRIPTION
 
