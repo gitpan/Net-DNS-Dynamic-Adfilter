@@ -22,16 +22,13 @@
       "runtime" : {
          "requires" : {
             "Capture::Tiny" : "0",
-            "Getopt::Long" : "0",
             "LWP::Simple" : "0",
             "Moose" : "0",
             "Mozilla::CA" : "0",
-            "Net::DNS::Dynamic::Adfilter" : "0",
+            "Net::DNS" : "0.74",
             "Net::DNS::Dynamic::Proxyserver" : "0",
-            "Pod::Usage" : "0",
             "Sys::HostIP" : "0",
-            "strict" : "0",
-            "warnings" : "0"
+            "perl" : "5.006"
          }
       },
       "test" : {
@@ -54,6 +51,6 @@
          "web" : "https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter"
       }
    },
-   "version" : "0.072"
+   "version" : "0.073"
 }
 

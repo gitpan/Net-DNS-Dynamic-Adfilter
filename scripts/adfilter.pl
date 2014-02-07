@@ -67,10 +67,6 @@ Net::DNS::Dynamic::Adfilter->new( $args )->run();
 
 adfilter.pl - Sample script using Net::DNS::Dynamic::Adfilter
 
-=head1 VERSION
-
-version 0.072
-
 =head1 SYNOPSIS
 
 adfilter.pl [options]

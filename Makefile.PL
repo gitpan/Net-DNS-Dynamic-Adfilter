@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-
+use 5.006;
 
 use ExtUtils::MakeMaker 6.30;
 
@@ -20,25 +20,19 @@ my %WriteMakefileArgs = (
     "ExtUtils::MakeMaker" => "6.30"
   },
   "DISTNAME" => "Net-DNS-Dynamic-Adfilter",
-  "EXE_FILES" => [
-    "scripts/adfilter.pl"
-  ],
+  "EXE_FILES" => [],
   "LICENSE" => "perl",
   "NAME" => "Net::DNS::Dynamic::Adfilter",
   "PREREQ_PM" => {
     "Capture::Tiny" => 0,
-    "Getopt::Long" => 0,
     "LWP::Simple" => 0,
     "Moose" => 0,
     "Mozilla::CA" => 0,
-    "Net::DNS::Dynamic::Adfilter" => 0,
+    "Net::DNS" => "0.74",
     "Net::DNS::Dynamic::Proxyserver" => 0,
-    "Pod::Usage" => 0,
-    "Sys::HostIP" => 0,
-    "strict" => 0,
-    "warnings" => 0
+    "Sys::HostIP" => 0
   },
-  "VERSION" => "0.072",
+  "VERSION" => "0.073",
   "test" => {
     "TESTS" => "t/*.t"
   }

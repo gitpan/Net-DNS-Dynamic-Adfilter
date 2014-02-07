@@ -1,8 +1,9 @@
 package Net::DNS::Dynamic::Adfilter;
 {
-  $Net::DNS::Dynamic::Adfilter::VERSION = '0.072';
+  $Net::DNS::Dynamic::Adfilter::VERSION = '0.073';
 }
 
+use Net::DNS 0.74;
 use Moose;
 use Sys::HostIP;
 use Capture::Tiny qw(capture);
@@ -260,7 +261,7 @@ Net::DNS::Dynamic::Adfilter - A DNS ad filter
 
 =head1 VERSION
 
-version 0.072
+version 0.073
 
 =head1 DESCRIPTION
 
