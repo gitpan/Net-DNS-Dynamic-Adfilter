@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use 5.006;
+use 5.010;
 
 use ExtUtils::MakeMaker 6.30;
 
@@ -14,7 +14,8 @@ my %WriteMakefileArgs = (
   "BUILD_REQUIRES" => {
     "Data::Dumper" => 0,
     "Net::DNS::Resolver" => 0,
-    "Test" => 0
+    "Test" => 0,
+    "Test::More" => 0
   },
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.30"
@@ -32,7 +33,7 @@ my %WriteMakefileArgs = (
     "Net::DNS::Dynamic::Proxyserver" => 0,
     "Sys::HostIP" => 0
   },
-  "VERSION" => "0.073",
+  "VERSION" => "0.074",
   "test" => {
     "TESTS" => "t/*.t"
   }

@@ -1,6 +1,6 @@
 package Net::DNS::Dynamic::Adfilter;
 {
-  $Net::DNS::Dynamic::Adfilter::VERSION = '0.073';
+  $Net::DNS::Dynamic::Adfilter::VERSION = '0.074';
 }
 
 use Net::DNS 0.74;
@@ -261,7 +261,7 @@ Net::DNS::Dynamic::Adfilter - A DNS ad filter
 
 =head1 VERSION
 
-version 0.073
+version 0.074
 
 =head1 DESCRIPTION
 
@@ -390,7 +390,7 @@ David Watson <dwatson@cpan.org>
 
 =head1 SEE ALSO
 
-Installed script: /usr/local/bin/adfilter.pl (scripts/adfilter.pl in the distribution)
+scripts/ in the distribution
 
 Net::DNS::Dynamic::Proxyserver
 

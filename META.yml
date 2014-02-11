@@ -6,6 +6,7 @@ build_requires:
   Data::Dumper: 0
   Net::DNS::Resolver: 0
   Test: 0
+  Test::More: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
@@ -23,9 +24,9 @@ requires:
   Net::DNS: 0.74
   Net::DNS::Dynamic::Proxyserver: 0
   Sys::HostIP: 0
-  perl: 5.006
+  perl: 5.010
 resources:
   bugtracker: https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter/issues
   homepage: http://search.cpan.org/~dwatson/Net-DNS-Dynamic-Adfilter/
   repository: git://github.com/terminalfool/Net-DNS-Dynamic-Adfilter.git
-version: 0.073
+version: 0.074
