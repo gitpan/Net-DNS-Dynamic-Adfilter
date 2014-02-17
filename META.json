@@ -4,7 +4,7 @@
       "David Watson <dwatson@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300016, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "Dist::Zilla version 5.008, CPAN::Meta::Converter version 2.133380",
    "license" : [
       "perl_5"
    ],
@@ -19,6 +19,13 @@
             "ExtUtils::MakeMaker" : "6.30"
          }
       },
+      "develop" : {
+         "requires" : {
+            "Pod::Coverage::TrustPod" : "0",
+            "Test::Pod" : "1.41",
+            "Test::Pod::Coverage" : "1.08"
+         }
+      },
       "runtime" : {
          "requires" : {
             "Capture::Tiny" : "0",
@@ -27,6 +34,7 @@
             "Mozilla::CA" : "0",
             "Net::DNS" : "0.74",
             "Net::DNS::Dynamic::Proxyserver" : "0",
+            "Storable" : "0",
             "Sys::HostIP" : "0",
             "perl" : "5.010"
          }
@@ -35,8 +43,8 @@
          "requires" : {
             "Data::Dumper" : "0",
             "Net::DNS::Resolver" : "0",
-            "Test" : "0",
-            "Test::More" : "0"
+            "Test::More" : "0",
+            "lib" : "0"
          }
       }
    },
@@ -52,6 +60,6 @@
          "web" : "https://github.com/terminalfool/Net-DNS-Dynamic-Adfilter"
       }
    },
-   "version" : "0.074"
+   "version" : "0.075"
 }
 

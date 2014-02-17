@@ -2,7 +2,7 @@ NAME
     Net::DNS::Dynamic::Adfilter - A DNS ad filter
 
 VERSION
-    version 0.074
+    version 0.075
 
 DESCRIPTION
     This is an ad filter for use in a local area network. Its function is to

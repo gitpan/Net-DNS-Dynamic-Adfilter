@@ -1,15 +1,17 @@
 package Net::DNS::Dynamic::Adfilter;
 {
-  $Net::DNS::Dynamic::Adfilter::VERSION = '0.074';
+  $Net::DNS::Dynamic::Adfilter::VERSION = '0.075';
 }
 
 use Net::DNS 0.74;
+
 use Moose;
 use Sys::HostIP;
 use Capture::Tiny qw(capture);
 use LWP::Simple qw($ua getstore);
 $ua->agent("");
 use Mozilla::CA;
+use Storable qw(freeze thaw);
 
 #use Data::Dumper;
 
@@ -22,7 +24,17 @@ has loopback => ( is => 'ro', isa => 'Str', required => 0 );
 has adfilter => ( is => 'rw', isa => 'HashRef', required => 0 );
 has network => ( is => 'rw', isa => 'HashRef', required => 0 );
 has setdns => ( is => 'rw', isa => 'Bool', required => 0, default => 0 );
+has attributes => ( is => 'rw', isa => 'Str', required => 0 );
 has '+host' => ( default => sub { Sys::HostIP->ip } );
+
+around 'BUILDARGS' => sub {
+        my ($orig, $class, %args) = @_;
+
+        $args{attributes} = freeze \%args;
+
+        return $class->$orig(%args);
+
+};
 
 before 'run' => sub {
 	my ( $self ) = shift;
@@ -64,11 +76,14 @@ around 'reply_handler' => sub {                         # query ad listings
 
 after 'read_config' => sub {
  	my ( $self ) = shift;
+	my $attributes = thaw($self->attributes);
+	for ( keys %{$attributes} ) { $self->{$_} = $attributes->{$_} };      # HUP restore
+
         my $cache = ();
 
         if ($self->adblock_stack) {
         	for ( @{ $self->adblock_stack } ) {
- 	                $cache = { $self->load_adblock_filter($_) };                  # adblock plus hosts
+ 	                $cache = { $self->load_adblock_filter($_) };          # adblock plus hosts
                         %{ $self->{adfilter} } = $self->adfilter ? ( %{ $self->{adfilter} }, %{ $cache } ) 
                                          : %{ $cache };
 	        }
@@ -261,7 +276,7 @@ Net::DNS::Dynamic::Adfilter - A DNS ad filter
 
 =head1 VERSION
 
-version 0.074
+version 0.075
 
 =head1 DESCRIPTION
 
